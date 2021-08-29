@@ -1,5 +1,10 @@
 package com.atguigu.java8;
 
+import org.junit.Test;
+
+import java.util.*;
+import java.util.function.Consumer;
+
 /*
  * 一、Lambda 表达式的基础语法：Java8中引入了一个新的操作符 "->" 该操作符称为箭头操作符或 Lambda 操作符
  * 						    箭头操作符将 Lambda 表达式拆分成两部分：
@@ -37,4 +42,66 @@ package com.atguigu.java8;
  * 			 可以检查是否是函数式接口
  */
 public class TestLambda2 {
+
+    @Test
+    public void test1() {
+        int num = 0;//jdk1.7之前，必须是final
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Hello World!" + num);
+            }
+        };
+        r.run();
+
+        System.out.println("-----------------------");
+
+        Runnable r1 = () -> System.out.println("Hello Lambda!");
+        r1.run();
+    }
+
+    @Test
+    public void test2() {
+//        Consumer<String> con = (x) -> System.out.println(x);
+        Consumer<String> con = x -> System.out.println(x);
+        con.accept("test");
+    }
+
+    @Test
+    public void test3() {
+        Comparator<Integer> com = (x, y) -> {
+            System.out.println("函数式接口");
+            return Integer.compare(x, y);
+        };
+    }
+
+    @Test
+    public void test4() {
+        Comparator<Integer> com = (x, y) -> Integer.compare(x, y);
+    }
+
+    @Test
+    public void test5() {
+//		String[] strs;
+//		strs = {"aaa", "bbb", "ccc"};
+
+        List<String> list = new ArrayList<>();
+
+        show(new HashMap<>());
+    }
+
+    public void show(Map<String, Integer> map) {
+    }
+
+    @Test
+    public void test6() {
+        Integer operation = operation(100, x -> x * x);
+        System.out.println(operation);
+
+        System.out.println(operation(200, x -> x + 200));
+    }
+
+    public Integer operation(Integer num, MyFun mf) {
+        return mf.getValue(num);
+    }
 }
