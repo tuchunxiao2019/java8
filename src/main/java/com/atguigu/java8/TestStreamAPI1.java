@@ -2,10 +2,8 @@ package com.atguigu.java8;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -83,6 +81,7 @@ public class TestStreamAPI1 {
         }
     }
 
+    //截断流
     @Test
     public void test4() {
         emps.stream()
@@ -94,6 +93,7 @@ public class TestStreamAPI1 {
                 .forEach(System.out::println);
     }
 
+    //跳过元素
     @Test
     public void test5() {
         emps.stream()
@@ -102,6 +102,7 @@ public class TestStreamAPI1 {
                 .forEach(System.out::println);
     }
 
+    //筛选
     @Test
     public void test6() {
         emps.stream()
@@ -126,20 +127,23 @@ public class TestStreamAPI1 {
 
         System.out.println("-----------------------------");
 
-//        emps.stream()
-//                .map((e) -> e.getName())
-//                .forEach(System.out::println);
+        emps.stream()
+                .map((e) -> e.getName())
+                .forEach(System.out::println);
+
+        System.out.println("----------------------------");
+
         emps.stream()
                 .map(Employee::getName)
                 .forEach(System.out::println);
 
         System.out.println("-----------------------------");
 
-//        Stream<Stream<Character>> stream = list.stream()
-//                .map(TestStreamAPI1::filterCharacter);// {{a,a,a},{b,b,b}}
-//        stream.forEach((sm) -> {
-//            sm.forEach(System.out::println);
-//        });
+        Stream<Stream<Character>> stream = list.stream()
+                .map(TestStreamAPI1::filterCharacter);// {{a,a,a},{b,b,b}}
+        stream.forEach((sm) -> {
+            sm.forEach(System.out::println);
+        });
 
         System.out.println("------------------------------");
 
@@ -187,14 +191,16 @@ public class TestStreamAPI1 {
             new Employee2("李四", 58, 5555.55, Employee2.Status.BUSY),
             new Employee2("王五", 26, 3333.33, Employee2.Status.VOCATION),
             new Employee2("赵六", 36, 6666.66, Employee2.Status.FREE),
+            new Employee2("田七", 12, 8888.88, Employee2.Status.BUSY),
             new Employee2("田七", 12, 8888.88, Employee2.Status.BUSY)
     );
 
     //终止操作
     /*
+        查找与匹配
 		allMatch——检查是否匹配所有元素
 		anyMatch——检查是否至少匹配一个元素
-		noneMatch——检查是否没有匹配的元素
+		noneMatch——检查是否没有匹配所有元素
 		findFirst——返回第一个元素
 		findAny——返回当前流中的任意元素
 		count——返回流中元素的总个数
@@ -207,12 +213,96 @@ public class TestStreamAPI1 {
                 .allMatch((e) -> e.getStatus().equals(Employee2.Status.BUSY));
         System.out.println(b1);
 
+        System.out.println("----------------------------");
+
         boolean b2 = employee2s.stream()
                 .anyMatch((e) -> e.getStatus().equals(Employee2.Status.BUSY));
         System.out.println(b2);
 
+        System.out.println("----------------------------");
+
         boolean b3 = employee2s.stream()
                 .noneMatch((e) -> e.getStatus().equals(Employee2.Status.BUSY));
         System.out.println(b3);
+
+        System.out.println("----------------------------");
+
+        Optional<Employee2> first = employee2s.stream()
+                .sorted((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()))
+                .findFirst();
+        System.out.println(first.get());
+
+        System.out.println("----------------------------");
+
+        Optional<Employee2> any = employee2s.parallelStream() //并行流
+                .filter((e) -> e.getStatus().equals(Employee2.Status.FREE))
+                .findAny();
+        System.out.println(any.get());
+
+        System.out.println("----------------------------");
+
+        long count = employee2s.stream()
+                .count();
+        System.out.println(count);
+
+        System.out.println("----------------------------");
+
+        Optional<Employee2> max = employee2s.stream()
+                .max((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()));
+        System.out.println(max.get());
+
+        System.out.println("----------------------------");
+
+        Optional<Double> min = employee2s.stream()
+                .map(Employee2::getSalary)
+                .min(Double::compare);
+        System.out.println(min.get());
+    }
+
+    /*
+		归约
+		reduce(T identity, BinaryOperator) / reduce(BinaryOperator) ——可以将流中元素反复结合起来，得到一个值。
+	 */
+    @Test
+    public void test10() {
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+        Integer reduce = list.stream()
+                .reduce(0, (x, y) -> x + y);
+        System.out.println(reduce);
+
+        System.out.println("----------------------------");
+
+        Optional<Double> reduce1 = employee2s.stream()
+                .map(Employee2::getSalary)
+                .reduce(Double::sum);
+        System.out.println(reduce1.get());
+    }
+
+    /*
+        收集
+        collect——将流转换为其他形式。接收一个 Collector接口的实现，用于给Stream中元素做汇总的方法
+     */
+    @Test
+    public void test11() {
+        employee2s.stream()
+                .map(Employee2::getName)
+                .collect(Collectors.toList())
+                .forEach(System.out::println);
+
+        System.out.println("----------------------------");
+
+        employee2s.stream()
+                .map(Employee2::getName)
+                .collect(Collectors.toSet())
+                .forEach(System.out::println);
+
+        System.out.println("----------------------------");
+
+
+        employee2s.stream()
+                .map(Employee2::getName)
+                .collect(Collectors.toCollection(HashSet::new))
+                .forEach(System.out::println);
     }
 }
