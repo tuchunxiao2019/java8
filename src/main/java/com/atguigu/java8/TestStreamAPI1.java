@@ -299,10 +299,95 @@ public class TestStreamAPI1 {
 
         System.out.println("----------------------------");
 
-
         employee2s.stream()
                 .map(Employee2::getName)
                 .collect(Collectors.toCollection(HashSet::new))
                 .forEach(System.out::println);
+    }
+
+    @Test
+    public void test12() {
+        //总数
+        Long count = employee2s.stream()
+                .collect(Collectors.counting());
+        System.out.println(count);
+
+        System.out.println("----------------------------");
+
+        //平均值
+        Double avg = employee2s.stream()
+                .collect(Collectors.averagingDouble(Employee2::getSalary));
+        System.out.println(avg);
+
+        System.out.println("----------------------------");
+
+        //总和
+        Double sum = employee2s.stream()
+                .collect(Collectors.summingDouble(Employee2::getSalary));
+        System.out.println(sum);
+
+        System.out.println("----------------------------");
+
+        //最大值
+        Optional<Employee2> max = employee2s.stream()
+                .collect(Collectors.maxBy((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary())));
+        System.out.println(max.get());
+
+        System.out.println("----------------------------");
+
+        //最小值
+        Optional<Double> min = employee2s.stream()
+                .map(Employee2::getSalary)
+                .collect(Collectors.minBy(Double::compare));
+        System.out.println(min.get());
+    }
+
+    //分组
+    @Test
+    public void test13() {
+        Map<Employee2.Status, List<Employee2>> collect = employee2s.stream()
+                .collect(Collectors.groupingBy(Employee2::getStatus));
+        System.out.println(collect);
+    }
+
+    //多级分组
+    @Test
+    public void test14() {
+        Map<Employee2.Status, Map<String, List<Employee2>>> collect = employee2s.stream()
+                .collect(Collectors.groupingBy(Employee2::getStatus, Collectors.groupingBy((e) -> {
+                    if (e.getAge() <= 35) {
+                        return "青年";
+                    } else if (e.getAge() <= 50) {
+                        return "中年";
+                    } else {
+                        return "老年";
+                    }
+                })));
+        System.out.println(collect);
+    }
+
+    //分区
+    @Test
+    public void test15() {
+        Map<Boolean, List<Employee2>> collect = employee2s.stream()
+                .collect(Collectors.partitioningBy((e) -> e.getSalary() > 8000));
+        System.out.println(collect);
+    }
+
+    @Test
+    public void test16() {
+        DoubleSummaryStatistics collect = employee2s.stream()
+                .collect(Collectors.summarizingDouble(Employee2::getSalary));
+        System.out.println(collect.getAverage());
+        System.out.println(collect.getSum());
+        System.out.println(collect.getMax());
+    }
+
+    @Test
+    public void test17() {
+        String str = employee2s.stream()
+                .map(Employee2::getName)
+                .collect(Collectors.joining(",", "===", "==="));
+        System.out.println(str);
     }
 }
